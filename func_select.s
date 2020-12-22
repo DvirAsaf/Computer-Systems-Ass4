@@ -1,305 +1,240 @@
 #	313531113	Dvir Asaf
-
 .data
 .section	.rodata
-               format_of_input_int:     .string "%d"
-               format_case50_printf:    .string "first pstring length: %d, second pstring length: %d\n"
-               format_case52_getChar:   .string " %c"
-               format_case52_printf:    .string "old char: %c, new char: %c, first string: %s, second string: %s\n"
-               format_case53_printf:    .string "length: %d, string: %s\n"
+               input_format:                .string "%d"
+               case50_format_for_print:     .string "first pstring length: %d, second pstring length: %d\n"
+               case52_getChar:              .string " %c"
+               case52_format_for_print:     .string "old char: %c, new char: %c, first string: %s, second string: %s\n"
+               case53_format_for_print:     .string "length: %d, string: %s\n"
                case55_format_for_print:     .string "compare result: %d\n"
-               invalid_option_output_format:   .string "invalid option!\n"
+               invalid_option_format:       .string "invalid option!\n"
 .align 8 #Align address to multiple of 8
 .userOptions:
-              .quad .case50 #50
-              .quad .defulteCase #51
-              .quad .case52 #52
-              .quad .case53 #53
-              .quad .case54 #54
-              .quad .case55 #55
-              .quad .defulteCase #56
-              .quad .defulteCase #57
-              .quad .defulteCase #58
-              .quad .defulteCase #59
-              .quad .case50 #60
+              .quad .case50                  #50
+              .quad .defulte                 #51
+              .quad .case52                  #52
+              .quad .case53                  #53
+              .quad .case54                  #54
+              .quad .case55                  #55
+              .quad .defulte                 #56
+              .quad .defulte                 #57
+              .quad .defulte                 #58
+              .quad .defulte                 #59
+              .quad .case50                  #60
 .text
 .global run_func
-.type run_func, @function
-
+    .type run_func, @function
 run_func:
-                 pushq %rbp                           #backup %rbp
-                 movq %rsp,%rbp                       #make rbp point to the address of the stack pointer
-
-                 pushq %r12                           #backup the CALLE REGISTER
-                 pushq %r14                           #%r14 - pointer to second pstring, %r12 -pointer to first pstring
-                 pushq %rbx
-                 pushq %r15
-
-                 movq %rsi,%r12                       #save the argument of function in register
-                 movq %rdx,%r14
-		leaq -50(%rdi),%rcx                   #register %rdi contains the input value  (user option)
-                                                       #compute xi=x-100
-		cmpq $10,%rcx	                     #compare xi:3
-		ja .defulteCase                       #if >, goto defulte case
-		jmp *.userOptions(,%rcx,8)             #goto jump table[xi]
-
-                #case 50 - the user option is 50 so call function pstrlen to get the length of both pstring
-
+               pushq %rbp                    #backup register rbp.
+               movq %rsp,%rbp                #make rbp point to the address of the stack pointer.
+               pushq %r12                    #backup the calle registers: r12,r14,rbx,r15.
+               pushq %r14                    #r12 - pointer to 1'st pstring & r14 - pointer to 2'st pstring.
+               pushq %rbx
+               pushq %r15
+               movq %rsi,%r12                #function argument save in register.
+               movq %rdx,%r14
+		       leaq -50(%rdi),%rcx           #rdi contains the input value that user choose.
+                                             #compute xi=x-100
+		       cmpq $10,%rcx	             #compare xi:10
+		       ja .defulte                   #goto defulte
+		       jmp *.userOptions(,%rcx,8)    #goto jump table[xi]
+                #user option -> 50 : so call func pstring to get the length of both pstring
                 .case50:
-                        xorq  %rax, %rax               #set rgister to be zero
-                        xorq  %rdi, %rdi
-                        movq %r12,%rdi                 #set first argument of pstring function to be the address of start
-                                                       #of the first pstring
+                        xorq  %rax, %rax     #set rax to be 0.
+                        xorq  %rdi, %rdi     #set rdi to be 0.
+                        movq %r12,%rdi       #set 1'st arg of pstring func to be the add of start of the 1'st pstring.
                         call pstring
-                        movq %rax,%rsi                 #set %rsi register,second argumnet of function printf, to be the return
-                                                       #result of pstring function
-
-                        xorq  %rax, %rax               #set rgister to be zero
-                        xorq  %rdi, %rdi
-                        movq %r14,%rdi                 #set first argument of pstring function to be the address of start
-                                                       #of the second pstring
+                        movq %rax,%rsi       #set rsi reg, 2'st arg of func printf, to be the return result of pstring func.
+                        xorq  %rax, %rax     #set rax to be 0.
+                        xorq  %rdi, %rdi     #set rdi to be 0.
+                        movq %r14,%rdi       #set 1'st arg of pstring func to be the add of start of the 2'st pstring.
                         call pstring
-                        movq %rax,%rdx                 #set %rdx register,third argumnet of function printf, to be the return
-                                                       #result of pstring function
-
-                        xorq  %rdi, %rdi
-                        movq $format_case50_printf,%rdi #the first argument of scanf function is pointer to the format
-                                                        #of string input
-                        xorq %rax, %rax
+                        movq %rax,%rdx       #set rdx reg, 3'st arg of func printf, to be the return result of pstring func.
+                        xorq  %rdi, %rdi     #set rdi to be 0.
+                        movq $case50_format_for_print,%rdi
+                                             #the 1'st arg of scanf func is pointer to the format of string input
+                        xorq %rax, %rax      #set rax to be 0.
                         call printf
-
-                	    jmp .end_switch
-
-
-                #case 52 - the user option is 52 so get from the user to char input and call replaceChar function
+                	    jmp .end
+                #user option -> 52 : so get char from user & call func replaceChar.
                 .case52:
-                         subq $1,%rsp                   #allocate memory on stack for scanf char input of one byte size
-                         xorq %rdi,%rdi
-                         movq $format_case52_getChar,%rdi
-                         movq %rsp,%rsi                 #the second argument of scanf function is pointer to the
-                                                        #location on stack where we want to write the input value
-                         xorq  %rax, %rax               #set rgister to be zero
-                         call scanf
-
-                         xorq %rbx,%rbx                   #set rgister to be zero
-                         movb (%rsp),%bl               #save the old cahr in %rbx register
-
-
-                         subq $1,%rsp                   #allocate memory on stack for scanf char input of one byte size
-                         xorq %rdi,%rdi
-                         movq $format_case52_getChar,%rdi
-                         movq %rsp,%rsi                 #the second argument of scanf function is pointer to the
-                                                        #location on stack where we want to write the input value
-                         xorq  %rax, %rax               #set rgister to be zero
-                         call scanf
-
-                         xorq %r15,%r15                   #set rgister to be zero
-                         movb (%rsp),%r15b               #save the new cahr in %r15 register
-
-                         addq $2,%rsp                   #reallocate
-
-                         xorq %rdi,%rdi                 #set rgister to be zero
-                         xorq %rsi,%rsi
-                         xorq %rdx,%rdx
-                         xorq %rax,%rax
-
-                         movq %r12,%rdi                 #set first aegument to be pointer to start of first string
-                         movq %rbx,%rsi
-                         movq %r15,%rdx
-
-                         call replaceChar              #call replaceChar function
-
-                         movq %r14,%rdi                 #set first aegument to be pointer to start of second string
-                         xorq  %rax, %rax
-                         call replaceChar
-
-                         #start printf the result:
-                         xorq %rdi,%rdi                 #set rgister to be zero
-                         xorq  %rsi, %rsi
-                         xorq  %rcx, %rcx
-                         xorq  %r8, %r8
-                         xorq  %rax, %rax
-
-                         movq $format_case52_printf,%rdi    #first aegument of function -format of printing
-                         movq %rbx,%rsi                     #second argument - old char
-                         movq %r15,%rdx                      #second argument - new char
-
-                         leaq 1(%r12),%rcx                  #third argument - pointer to start of strings
-                         leaq 1(%r14),%r8
-
-                         call printf
-
-                         jmp .end_switch
-
-                #case 53 - the user option is 53 so get from the user 2 int input and call pstrijcpy function
-                .case53:
-                         leaq -4(%rsp),%rsp                 #increase the size of the stack in size if input (of type int)
-                         xorq %rdi,%rdi
-                         xorq  %rax, %rax
-                         xorq  %rsi, %rsi
-
-                         movq $format_of_input_int,%rdi  #the first argument of scanf function is pointer to the format
-                                                            #of string input
-                         movq %rsp,%rsi
-                         call scanf                         #get the first input from user -index i
-
-                         xorq %r15,%r15
-                         movb (%rsp),%r15b                 #save index i in %r15 register (char is only one byte)
-
-                         ###scanf the end index j:
-                         leaq -4(%rsp),%rsp                 #increase the size of the stack in size if input (of type int)
-                         xorq  %rax, %rax
-                         xorq %rdi,%rdi
-                         xorq  %rsi, %rsi
-                         movq $format_of_input_int,%rdi  #the first argument of scanf function is pointer to the format
-                                                            #of string input
-
-                         movq %rsp,%rsi
-                         call scanf                         #get the first input from user -index i
-
-                         xorq %rbx,%rbx
-                         movb (%rsp),%bl                  #save index i in %rbx egister  (char is only one byte)
-
-                         leaq 8(%rsp),%rsp                  #reallocated
-
-                         #prepering call pstrijcpy function:
-                         xorq  %rax, %rax
-                         xorq %rdi,%rdi
-                         xorq  %rcx, %rcx
-                         xorq  %rdx, %rdx
-
-                         movq %r12,%rdi                     #first argument - pointer to first string
-                         movq %r14,%rsi                     #second argument - pointer to second string
-                         movb %r15b,%dl                     #third argumnet - index i (start) (char is only one byte)
-                         movb %bl,%cl                     #forth argument - index j (end)(char is only one byte)
-
-                         call pstrijcpy
-
-                         xorq  %rax, %rax                   #set rgister to be zero
-                         xorq %rdi,%rdi
-                         movq $format_case53_printf,%rdi    #the first argument of scanf function is pointer to the format
-                                                            #of string input
-                         xorq %rsi,%rsi
-                         movb (%r12),%sil                   #set second argument to be the length of pstring
-                         leaq 1(%r12),%rdx                  #skip the pstring length
-
-                         call printf
-
-                         xorq  %rax, %rax                   #set rgister to be zero
-                         xorq %rdi,%rdi
-                         movq $format_case53_printf,%rdi    #the first argument of scanf function is pointer to the format
-                                                            #of string input
-                         xorq %rsi,%rsi
-                         movb (%r14),%sil                   #set second argument to be the length of pstring
-                         leaq 1(%r14),%rdx                  #skip the pstring length
-
-                         call printf
-
-
-                		jmp .end_switch
-                #case 54 - the user option is 54 so call swapCase function
-                .case54:
-                         xorq %rdi,%rdi                     #set rgister to be zero
-                         xorq  %rax, %rax
-                         xorq  %rsi, %rsi
-
-                         movq %r12,%rdi                     #first argument - pointer to start of first pstring
-                         call swapCase
-
-                         xorq %rdi,%rdi                     #set rgister to be zero
-                         xorq  %rax, %rax
-                         xorq  %rsi, %rsi
-
-                         movq $format_case53_printf,%rdi    #first argument - format of printf function
-                         movb (%r12),%sil                   #set second argument to be the length of pstring
-                         leaq 1(%r12),%rdx                  #skip the pstring length
-
-                         call printf
-                         xorq %rdi,%rdi                     #set rgister to be zero
-                         xorq  %rax, %rax
-                         xorq  %rsi, %rsi
-
-                         movq %r14,%rdi                     #first argument - pointer to start of second pstring
-                         call swapCase
-
-                         xorq %rdi,%rdi                     #set rgister to be zero
-                         xorq  %rax, %rax
-                         xorq  %rsi, %rsi
-
-                         movq $format_case53_printf,%rdi    #first argument - format of printf functionr
-                         movb (%r14),%sil                   #set second argument to be the length of pstring
-                         leaq 1(%r14),%rdx                  #skip the pstring length
-
-                         call printf
-                         jmp .end_switch
-
-
-                #defult case - the user enter invalid option
-                .case55:
-                        leaq -4(%rsp),%rsp                 #increase the size of the stack in size if input (of type int)
-                        xorq %rdi,%rdi
-                        xorq  %rax, %rax
-                        xorq  %rsi, %rsi
-
-                        movq $format_of_input_int,%rdi  #the first argument of scanf function is pointer to the format
-                                                                            #of string input
-                        movq %rsp,%rsi
-                        call scanf                         #get the first input from user -index i
-
-                        xorq %r15,%r15
-                        movb (%rsp),%r15b                 #save index i in %r15 register (char is only one byte)
-
-                        ###scanf the end index j:
-                        leaq -4(%rsp),%rsp                 #increase the size of the stack in size if input (of type int)
-                        xorq  %rax, %rax
-                        xorq %rdi,%rdi
-                        xorq  %rsi, %rsi
-                        movq $format_of_input_int,%rdi  #the first argument of scanf function is pointer to the format
-                                                                            #of string input
-
-                        movq %rsp,%rsi
-                        call scanf                         #get the first input from user -index i
-
-                        xorq %rbx,%rbx
-                        movb (%rsp),%bl                  #save index i in %rbx egister  (char is only one byte)
-
-                        leaq 8(%rsp),%rsp                  #reallocated
-
-                                         #prepering call pstrijcpy function:
-                        xorq  %rax, %rax
-                        xorq %rdi,%rdi
-                        xorq  %rcx, %rcx
-                        xorq  %rdx, %rdx
-
-                        movq %r12,%rdi                     #first argument - pointer to first string
-                        movq %r14,%rsi                     #second argument - pointer to second string
-                        movb %r15b,%dl                     #third argumnet - index i (start) (char is only one byte)
-                        movb %bl,%cl                     #forth argument - index j (end)(char is only one byte)
-
-                        call pstrijcmp
-
-                        xorq  %rax, %rax                   #set rgister to be zero
-                        xorq %rdi,%rdi
-                        movq $case55_format_for_print,%rdi    #the first argument of scanf function is pointer to the format
-                                                                            #of string input
-                        xorq %rsi,%rsi
-                        movb (%r12),%sil                   #set second argument to be the length of pstring
-                        leaq 1(%r12),%rdx                  #skip the pstring length
-
+                        subq $1,%rsp         #allocate memory on stack for scanf char input of 1 byte size.
+                        xorq %rdi,%rdi       #set rdi to be 0.
+                        movq $case52_getChar,%rdi
+                        movq %rsp,%rsi       #the 2'st arg of scanf func is pointer to the location on stack where we want to write the input val.
+                        xorq  %rax, %rax     #set rax to be 0.
+                        call scanf
+                        xorq %rbx,%rbx       #set rbx to be 0.
+                        movb (%rsp),%bl      #save the old char in rbx.
+                        subq $1,%rsp         #allocate memory on stack for scanf char input of 1 byte size.
+                        xorq %rdi,%rdi       #set rdi to be 0.
+                        movq $case52_getChar,%rdi
+                        movq %rsp,%rsi       #the 2'st arg of scanf func is pointer to location on stack where we want to write the input val.
+                        xorq  %rax, %rax     #set rax to be 0.
+                        call scanf
+                        xorq %r15,%r15       #set r15 to be 0.
+                        movb (%rsp),%r15b    #save the new char in r15.
+                        addq $2,%rsp         #reallocate
+                        xorq %rdi,%rdi       #set rdi to be 0.
+                        xorq %rsi,%rsi       #set rsi to be 0.
+                        xorq %rdx,%rdx       #set rdx to be 0.
+                        xorq %rax,%rax       #set rax to be 0.
+                        movq %r12,%rdi       #set 1'st arg to be pointer to start of 1'st string.
+                        movq %rbx,%rsi
+                        movq %r15,%rdx
+                        call replaceChar
+                        movq %r14,%rdi       #set 1'st arg to be pointer to start of 2'st string.
+                        xorq  %rax, %rax     #set rax to be 0.
+                        call replaceChar
+                        #start printf the result:
+                        xorq %rdi,%rdi       #set rdi to be 0.
+                        xorq  %rsi, %rsi     #set rsi to be 0.
+                        xorq  %rcx, %rcx     #set rcx to be 0.
+                        xorq  %r8, %r8       #set r8 to be 0.
+                        xorq  %rax, %rax     #set rax to be 0.
+                        movq $case52_format_for_print,%rdi
+                                             #1'st arg of func - format of print.
+                        movq %rbx,%rsi       #2'st arg - old char.
+                        movq %r15,%rdx       #2'st arg - new char.
+                        leaq 1(%r12),%rcx    #3'st arg - pointer to start of strings
+                        leaq 1(%r14),%r8
                         call printf
-                        jmp .end_switch
+                        jmp .end
+                #user option -> 53 : so get 2 int from user & call func pstrijcpy.
+                .case53:
+                        #scanf index i:
+                        leaq -4(%rsp),%rsp   #increase size of stack in size of input.
+                        xorq %rdi,%rdi       #set rdi to be 0.
+                        xorq  %rax, %rax     #set rax to be 0.
+                        xorq  %rsi, %rsi     #set rsi to be 0.
+                        movq $input_format,%rdi
+                                             #1'st arg of scanf func is pointer to the format of string input.
+                        movq %rsp,%rsi
+                        call scanf           #get 1'st input from user - index i.
+                        xorq %r15,%r15       #set r15 to be 0.
+                        movb (%rsp),%r15b    #save index i in r15 (1 byte).
+                        #scanf index j:
+                        leaq -4(%rsp),%rsp   #increase size of stack in size of input.
+                        xorq  %rax, %rax     #set rax to be 0.
+                        xorq %rdi,%rdi       #set rdi to be 0.
+                        xorq  %rsi, %rsi     #set rsi to be 0.
+                        movq $input_format,%rdi
+                                             #1'st arg of scanf func is pointer to the format of string input.
+                        movq %rsp,%rsi
+                        call scanf           #get 2'st input from user - index j.
+                        xorq %rbx,%rbx       #set rbx to be 0.
+                        movb (%rsp),%bl      #save index j in rbx (1 byte).
+                        leaq 8(%rsp),%rsp    #reallocated
+                        #call pstrijcpy func:
+                        xorq  %rax, %rax     #set rax to be 0.
+                        xorq %rdi,%rdi       #set rdi to be 0.
+                        xorq  %rcx, %rcx     #set rcx to be 0.
+                        xorq  %rdx, %rdx     #set rdx to be 0.
+                        movq %r12,%rdi       #1'st arg - pointer to 1'st string.
+                        movq %r14,%rsi       #2'st arg - pointer to 2'st string.
+                        movb %r15b,%dl       #3'st arg - index i : start (1 byte).
+                        movb %bl,%cl         #4'st arg - index j : end (1 byte).
+                        call pstrijcpy
+                        xorq  %rax, %rax     #set rax to be 0.
+                        xorq %rdi,%rdi       #set rdi to be 0.
+                        movq $case53_format_for_print,%rdi
+                                             #1'st arg of scanf func is pointer to the format of string input.
+                        xorq %rsi,%rsi       #set rsi to be 0.
+                        movb (%r12),%sil     #set 2'st arg to be the length of pstring.
+                        leaq 1(%r12),%rdx    #skip the pstring length
+                        call printf
+                        xorq  %rax, %rax     #set rax to be 0.
+                        xorq %rdi,%rdi       #set rdi to be 0.
+                        movq $case53_format_for_print,%rdi
+                                             #1'st arg of scanf func is pointer to the format of string input
+                        xorq %rsi,%rsi       #set rsi to be 0.
+                        movb (%r14),%sil     #set 2'st arg to be the length of pstring.
+                        leaq 1(%r14),%rdx    #skip the pstring length.
+                        call printf
+                		jmp .end
+                #user option -> 54 : call func swapCase to change capital <-> small letters.
+                .case54:
+                        xorq %rdi,%rdi       #set rdi to be 0.
+                        xorq  %rax, %rax     #set rax to be 0.
+                        xorq  %rsi, %rsi     #set rsi to be 0.
+                        movq %r12,%rdi       #1'st arg - pointer to start of 1'st pstring.
+                        call swapCase
+                        xorq %rdi,%rdi       #set rdi to be 0.
+                        xorq  %rax, %rax     #set rax to be 0.
+                        xorq  %rsi, %rsi     #set rsi to be 0.
+                        movq $case53_format_for_print,%rdi
+                                             #1'st arg - format of printf func.
+                        movb (%r12),%sil     #set 2'st arg to be the length of pstring.
+                        leaq 1(%r12),%rdx    #skip the pstring length
+                        call printf
+                        xorq %rdi,%rdi       #set rdi to be 0.
+                        xorq  %rax, %rax     #set rax to be 0.
+                        xorq  %rsi, %rsi     #set rsi to be 0.
+                        movq %r14,%rdi       #1'st arg - pointer to start of 2'st pstring.
+                        call swapCase
+                        xorq %rdi,%rdi       #set rdi to be 0.
+                        xorq  %rax, %rax     #set rax to be 0.
+                        xorq  %rsi, %rsi     #set rsi to be 0.
+                        movq $case53_format_for_print,%rdi
+                                             #1'st arg - format of printf func.
+                        movb (%r14),%sil     #set 2'st arg to be the length of pstring.
+                        leaq 1(%r14),%rdx    #skip the pstring length.
+                        call printf
+                        jmp .end
+                #user option -> 55 : so get 2 int from user & call func pstrijcmp.
+                .case55:
+                        leaq -4(%rsp),%rsp  #increase size of stack in size of input.
+                        xorq %rdi,%rdi      #set rdi to be 0.
+                        xorq  %rax, %rax    #set rax to be 0.
+                        xorq  %rsi, %rsi    #set rsi to be 0.
+                        movq $input_format,%rdi
+                                            #1'st arg of scanf func is pointer to the format of string input.
+                        movq %rsp,%rsi
+                        call scanf          #get 1'st input from user - index i
+                        xorq %r15,%r15      #set r15 to be 0.
+                        movb (%rsp),%r15b   #save index i in r15 (1 byte).
+                        #scanf index j:
+                        leaq -4(%rsp),%rsp  #increase size of stack in size of input.
+                        xorq  %rax, %rax    #set rax to be 0.
+                        xorq %rdi,%rdi      #set rdi to be 0.
+                        xorq  %rsi, %rsi    #set rsi to be 0.
+                        movq $input_format,%rdi
+                                           #1'st arg of scanf func is pointer to the format of string input.
+                        movq %rsp,%rsi
+                        call scanf         #get 2'st input from user - index j.
+                        xorq %rbx,%rbx     #set rbx to be 0.
+                        movb (%rsp),%bl    #save index i in rbx (1 byte).
+                        leaq 8(%rsp),%rsp  #reallocated
+                        #call pstrijcpy func:
+                        xorq  %rax, %rax   #set rax to be 0.
+                        xorq %rdi,%rdi     #set rdi to be 0.
+                        xorq  %rcx, %rcx   #set rcx to be 0.
+                        xorq  %rdx, %rdx   #set rdx to be 0.
+                        movq %r12,%rdi     #1'st arg - pointer to 1'st string.
+                        movq %r14,%rsi     #2'st arg - pointer to 2'st string.
+                        movb %r15b,%dl     #3'st arg - index i : start (1 byte).
+                        movb %bl,%cl       #4'st arg - index j : end (1 byte).
+                        call pstrijcmp
+                        movq $case55_format_for_print,%rdi
+                                           #1'st arg of scanf func is pointer to the format of string input.
+                        movq %rax,%rsi
+                        movq $0, %rax
+                        call printf
+                        jmp .end
+                #user option -> 60 : call case 50.
                 .case60:
                         jmp .case50
-                .defulteCase:
-                          movq $invalid_option_output_format, %rdi  #first argument - format of printf function
-                          xorq %rax, %rax                           #set rgister to be zero
-                          call printf
-
-                .end_switch:
-                         popq %r14                          #restor CALLE SAVE REGISTER
-                         popq %r12
-                         popq %rbx
-                         popq %r15
-                         movq %rbp,%rsp                      #free stack frame's memory
-                         popq %rbp                            #restore %rbp
+                #defult - user enter invalid option.
+                .defulte:
+                        movq $invalid_option_format, %rdi
+                                            #1'st arg - format of printf func.
+                        xorq %rax, %rax     #set rax to be 0.
+                        call printf
+                .end:
+                        popq %r14           #restor calle save registers: r14
+                        popq %r12           #r12
+                        popq %rbx           #rbx
+                        popq %r15           #r15
+                        movq %rbp,%rsp      #free stack frame's memory
+                        popq %rbp           #restore rbp
                 		ret
