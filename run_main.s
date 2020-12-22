@@ -1,13 +1,13 @@
 #	313531113	Dvir Asaf
 .data
 .section    .rodata
-                input_int_format:           .string "%d"
-                input_string_format:        .string "%s\0"
-                output_string_format:       .string "your string is: %s\n"
+                input_int_format:          .string "%d"
+                input_string_format:       .string "%s\0"
+                output_string_format:      .string "your string is: %s\n"
 .text
-.global main
-    .type main, @function
-main:                                            #part 1 : scan input int & string
+.global run_main
+    .type run_main, @function
+run_main:                                        #part 1 : scan input int & string
             pushq %rbp                           #func start - backup the old rsp
             movq %rsp,%rbp                       #rbp point to the add of the stack pointer
             leaq -4(%rsp),%rsp                   #increase size of stack in size of input
@@ -63,3 +63,4 @@ main:                                            #part 1 : scan input int & stri
             pop %rbp                             #restore %rbp
             xorq %rax,%rax                       #set rax to be 0.
             ret
+

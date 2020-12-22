@@ -65,7 +65,7 @@ pstrijcpy:
             leaq 1(%rdi),%rdi                    #skip 2'st byte of pstring - length
             movq $0,%r8                          #index of 1'st string
             cmp %r8,%rcx                         #check if counter < j
-            ja .forLoopCopy
+            jae .forLoopCopy
             jmp .endLoopCopy
             .forLoopCopy:
                         cmp %r8,%rdx             #if counter = i
@@ -152,14 +152,18 @@ pstrijcmp:
             movq %rdi,%r9                        #backup pointer to 1'st string in %r9
                                                  #check if the index are valid input
             cmpb %dl,(%rsi)                      #check if i >= 2'st string length
-            jb .invalid                          #if not valid jump to invalid_input
-            cmpb %cl,(%rsi)                      #check if i > 1'st string length
-            jb .invalid                          #if not valid jump to invalid_input
+            jbe .invalid                         #if not valid jump to invalid_input
+            cmpb %dl,(%rdi)                      #check if i > 1'st string length
+            jbe .invalid                         #if not valid jump to invalid_input
+            cmpb %cl,(%rsi)                      #check if j > 2'st string length
+            jbe .invalid                         #if not valid jump to invalid_input
+            cmpb %cl,(%rdi)                      #check if j > 1'st string length
+            jbe .invalid                         #if not valid jump to invalid_input
             leaq 1(%rsi),%rsi                    #skip 1'st byte of pstring - length
             leaq 1(%rdi),%rdi                    #skip 2'st byte of pstring - length
             movq $0,%r8                          #index of 1'st string
             cmp %r8,%rcx                         #check if counter < j
-            ja .forLoopCom
+            jae .forLoopCom
             jmp .endLoopCom
             .forLoopCom:
                         cmp %r8,%rdx             #if counter = i
@@ -184,26 +188,23 @@ pstrijcmp:
                         addq $1,%r8              #update counter
                         jmp .forLoopCom
             .invalid:                            #we jump here if the user entered invalid index of i and j
-                        xorq  %rax, %rax         #set %rax to zero
-                        xorq  %rdi, %rdi         #set %rdi to zero
+                        xor  %rax, %rax          #set %rax to zero
+                        xor  %rdi, %rdi          #set %rdi to zero
                         movq $invalid_input, %rdi#set the arg of printf func to be a message.
                         call printf
-                        xorq  %rax, %rax         #set rax to be 0.
-                        movq  $-2,%r9            #return the value -2 to func_select
-                        movq  %r9,%rax           #set return value to be pointer to start of pstring
+                        xor  %rax, %rax          #set rax to be 0.
+                        mov  $-2,%eax            #return the value -2 to func_select
                         ret
             .big:
-                        xorq  %rax, %rax         #set rax to be 0.
-                        movq  $1,%r9             #return the value 1 to func_select
-                        movq  %r9,%rax           #set return value to be pointer to start of pstring
+                        xor  %rax, %rax          #set rax to be 0.
+                        mov $1,%eax              #return the value 1 to func_select
                         ret
             .equal:
-                        xorq  %rax, %rax         #set rax to be 0.
-                        movq  $0,%r9             #return the value 0 to func_select
-                        movq  %r9,%rax           #set return value to be pointer to start of pstring
+                        xor %rax,%rax            #set rax to be 0.
+                        cmp %rsi,%rdi
+                        jne .continueCom
                         ret
             .littel:
-                        xorq  %rax, %rax         #set rax to be 0.
-                        movq  $-1,%r9            #return the value -1 to func_select
-                        movq  %r9,%rax           #set return value to be pointer to start of pstring
+                        xor  %rax, %rax          #set rax to be 0.
+                        dec %eax                 #return the value -1 to func_select
                         ret
