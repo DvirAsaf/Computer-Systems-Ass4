@@ -1,9 +1,9 @@
 #	313531113	Dvir Asaf
 .data
-.section .rodata
-            input_int_format:       .string "%d"
-            input_string_format:    .string "%s\0"
-            output_string_format:      .string "your string is: %s\n"
+.section    .rodata
+                input_int_format:           .string "%d"
+                input_string_format:        .string "%s\0"
+                output_string_format:       .string "your string is: %s\n"
 .text
 .global main
     .type main, @function
